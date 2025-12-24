@@ -1,0 +1,73 @@
+services:
+  # Web Service - Flask Backend (app.py)
+  - type: web
+    name: atool-backend
+    runtime: python
+    region: oregon  # Choose: oregon, frankfurt, singapore (free tier available)
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    plan: free  # Free tier
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000  # Render uses port 10000
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: False
+      # Add your Supabase credentials in Render Dashboard
+      - key: SUPABASE_URL
+        sync: false  # Set manually in dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Optional: Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Discord (if needed)
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true  # Auto-deploy on git push
+
+  # Worker Service - Job Processor (job_worker_realtime.py)
+  - type: worker
+    name: atool-worker
+    runtime: python
+    region: oregon  # Same region as web service
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python job_worker_realtime.py
+    plan: free  # Free tier
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production
+      # Supabase credentials (same as web service)
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Backend URL (will be set after web service deploys)
+      - key: BACKEND_URL
+        sync: false  # Format: https://atool-backend.onrender.com
+      # Optional: Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+    autoDeploy: true
